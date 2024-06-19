@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "timelog",
+  "version": "0.1",
+  "description": "A Chrome extension to help you track and summarize your time",
+  "icons": {
+  },
+  "background": {
+    "service_worker": "worker.js"
+  },
+  "permissions": ["alarms", "activeTab", "scripting"]
+}
