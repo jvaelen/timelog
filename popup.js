@@ -27,45 +27,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // For default_popup.html, TODO: move to its own file.
 document.addEventListener('DOMContentLoaded', () => {
-  const logsContainer = document.getElementById('logs-container');
   const digestButton = document.getElementById('digest-button');
+  const digestResults = document.getElementById('digest-results');
+  const startDateInput = document.getElementById('start-date');
+  const endDateInput = document.getElementById('end-date');
 
-  // Function to fetch and display the latest entries
-  function updateLogs() {
+  function initDateInputsToToday() {
+    document.getElementById('start-date').valueAsDate = new Date();
+    document.getElementById('end-date').valueAsDate = new Date();
+  }
+
+  function showEntriesForToday() {
+      const today = new Date();
+      showEntriesForDateRange(today, today);
+  }
+
+  function getEntriesClickHandler() {
+      const startDate = startDateInput.value;
+      const endDate = endDateInput.value;
+      if (!startDate || !endDate) {
+          alert('Please select both start and end dates.');
+          return;
+      }
+      showEntriesForDateRange(startDate, endDate);
+  }
+
+  function showEntriesForDateRange(startDate, endDate) {
     chrome.storage.local.get({ activities: [] }, (result) => {
       const activities = result.activities;
-      const latestActivities = activities.slice(-5); // Get the last 5 entries
-      displayLogs(latestActivities);
+      const rangedActivities = filterActivitiesByDateRange(activities, startDate, endDate);
+      showEntriesInContainer(rangedActivities, digestResults);
     });
   }
 
-  // Function to display logs
-  function displayLogs(activities) {
-    logsContainer.innerHTML = activities.map(({ timestamp, activity }) => {
-      return `<div>${new Date(timestamp).toLocaleString()}: ${activity}</div>`;
-    }).join('');
+  function showEntriesInContainer(activities, container) {
+      container.innerHTML = activities.map(({ timestamp, activity }) => {
+          return `<div>${new Date(timestamp).toLocaleTimeString()}: ${activity}</div>`;
+      }).join('');
   }
 
-  // Function to get weekly digest
-  function getWeeklyDigest() {
-    chrome.storage.local.get({ activities: [] }, (result) => {
-      const activities = result.activities;
-      const filteredActivities = filterActivitiesByWeek(activities);
-      console.log('Weekly Digest:', filteredActivities);
-    });
-  }
-
-  // Function to filter activities by week
-  function filterActivitiesByWeek(activities) {
-    const now = new Date();
-    const firstDayOfWeek = now.getDate() - now.getDay();
-    const startDate = new Date(now.getFullYear(), now.getMonth(), firstDayOfWeek);
-    return activities.filter(({ timestamp }) => new Date(timestamp) >= startDate);
+  function filterActivitiesByDateRange(activities, startDate, endDate) {
+      return activities.filter(({ timestamp }) => {
+          const activityDate = new Date(timestamp);
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0); // set start of day
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999); // set end of day
+          return activityDate >= start && activityDate <= end;
+      });
   }
 
   // Add event listener to digest button
-  digestButton.addEventListener('click', getWeeklyDigest);
+  digestButton.addEventListener('click', getEntriesClickHandler);
 
-  // Initialize logs display
-  updateLogs();
+  // Initialize entries display
+  initDateInputsToToday();
+  showEntriesForToday();
 });
+
