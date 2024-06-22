@@ -5,6 +5,9 @@
   "description": "A Chrome extension to help you track and summarize your time",
   "icons": {
   },
+  "action": {
+    "default_popup": "default_popup.html"
+  },
   "background": {
     "service_worker": "worker.js"
   },
