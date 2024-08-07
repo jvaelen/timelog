@@ -85,6 +85,14 @@ button:hover {
     background-color: #0056b3;
 }
 
+#export-button {
+    background-color: #28a745;
+}
+
+#export-button:hover {
+    background-color: #218838;
+}
+
 .highlight {
     background-color: #d4edda;
 }
